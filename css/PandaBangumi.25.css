@@ -1,8 +1,7 @@
 .bgm-collection{
-    margin: 0 auto;
     display: flex;
     flex-flow: row wrap;
-    margin-left: -15px;
+    margin: 0 auto 0 -15px;
     width: calc(100% + 15px);
 }
 
@@ -23,7 +22,7 @@
     text-decoration: none!important;
 }
 
-@media screen and (max-width:767.5px){
+@media screen and (max-width:768px){
     .bgm-item{
         width: calc(33.33333333333% - 15px)
     }
@@ -35,7 +34,7 @@
     }
 }
 
-@media screen and (min-width:767.5px){
+@media screen and (min-width:768px){
     .bgm-item{
         width: calc(25% - 15px)
     }
