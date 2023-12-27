@@ -5,16 +5,16 @@ namespace TypechoPlugin\PandaBangumi;
 use Typecho\Plugin\Exception;
 use Utils\Helper;
 
-require_once 'simple_html_dom.php';
-
 class BangumiAPI
 {
     /**
      * 使用 curl 代替 file_get_contents()
      *
      * @access public
+     * @param string $_url
+     * @return bool|string
      */
-    public static function curlFileGetContents($_url): bool|string
+    public static function curlFileGetContents(string $_url): bool|string
     {
         $myCurl = curl_init($_url);
         //不验证证书
@@ -31,70 +31,53 @@ class BangumiAPI
     }
 
     /**
-     * 获取在看数据并格式化返回
+     * 获取收藏数据并格式化返回
      *
-     * @param $ID
+     * @param string $ID
+     * @param int $Offset
+     * @param int $status 1:想看2:看过 3:在看 4:搁置 5:抛弃
+     * @param int $subject_type 1:book 2:anime 3:music 4:game 6:real
      * @return array
+     * @throws Exception
      */
-    private static function __getCollectionRawData($ID): array
+    private static function __getCollectionRawData(string $ID, int $Offset = 0, int $status = 3, int $subject_type = 2): array
     {
-        $apiUrl = 'https://api.bgm.tv/user/' . $ID . '/collection?cat=playing';
-        $data = self::curlFileGetContents($apiUrl);
-        if ($data == 'null') {
+        $apiUrl = 'https://api.bgm.tv/v0/users/' . $ID . '/collections?subject_type=' . $subject_type . '&type=' . $status . '&limit=30&offset=' . $Offset;
+        $json = self::curlFileGetContents($apiUrl);
+        if ($json == 'null') {
             return array(); // 没有标记数据
         }
 
-        $data = json_decode($data, true);
+        $data = json_decode($json, true);
 
-        $weekdays = array('Mon.', 'Tue.', 'Wed.', 'Thu', 'Fri', 'Sat', 'Sun');
         $collections = array();
-        foreach ($data as $item) {
+
+        $total = $data['total'];
+        $limit = $data['limit'];
+        $offset = $data['offset'];
+        $list = $data['data'];
+
+        foreach ($list as $item) {
             $collect = array(
                 'name' => $item['subject']['name'],
                 'name_cn' => $item['subject']['name_cn'],
-                'url' => str_replace('http://', 'https://', $item['subject']['url']),
+                'url' => 'https://bgm.tv/subject/' . $item['subject']['id'],
                 'status' => $item['ep_status'],
-                'count' => $item['subject']['eps_count'],
-                'air_date' => $item['subject']['air_date'],
-                'air_weekday' => $weekdays[$item['subject']['air_weekday'] - 1],
-                'img' => str_replace('http://', 'https://', $item['subject']['images']['large']),
+                'count' => $item['subject']['eps'],
+                'air_date' => $item['subject']['date'],
+                'img' => $item['subject']['images']['large'],
                 'id' => $item['subject']['id'],
             );
             $collections[] = $collect;
         }
+
+        $userLimit = Helper::options()->plugin('PandaBangumi')->Limit;
+
+        if ($total > $limit + $offset && $userLimit > $limit + $offset) {
+            $collections = array_merge($collections, self::__getCollectionRawData($ID, $limit + $offset, $status, $subject_type));
+        }
+
         return $collections;
-    }
-
-    /**
-     * @param $url
-     * @return array
-     */
-    private static function __getWatchedCollectionRawDataHelper($url): array
-    {
-        $data = self::curlFileGetContents($url);
-        if ($data == 'null') {
-            return array(); // 没有标记数据
-        }
-
-        $data = json_decode($data, true)[0];
-
-        $result = array();
-        foreach ($data['collects'] as $collect) {
-            // 只处理已看
-            if ($collect['status']['id'] != 2) continue;
-
-            foreach ($collect['list'] as $item) {
-                $result[] = array(
-                    'name' => $item['subject']['name'],
-                    'name_cn' => $item['subject']['name_cn'],
-                    'url' => str_replace('http://', 'https://', $item['subject']['url']),
-                    'img' => str_replace('http://', 'https://', $item['subject']['images']['large']),
-                    'id' => $item['subject']['id'],
-                );
-            }
-        }
-
-        return $result;
     }
 
     /**
@@ -105,7 +88,7 @@ class BangumiAPI
      * @param int $ValidTimeSpan 有效时间，Unix 时间戳，s
      * @return  mixed     正常数据: 未过期; 1:已过期; -1：无缓存或缓存无效
      */
-    private static function __isCacheExpired($FilePath, $ValidTimeSpan): mixed
+    private static function __isCacheExpired(string $FilePath, int $ValidTimeSpan): mixed
     {
         if (!file_exists($FilePath)) {
             return -1;
@@ -123,117 +106,27 @@ class BangumiAPI
         return $content;
     }
 
-    private static function __parseFromDoc($doc): array
-    {
-        $result = array();
-        $bgmBase = 'https://bgm.tv';
-        foreach ($doc->find('#browserItemList li.item') as $item) {
-            $name_cn = $item->find('h3 a', 0)->text();
-            $name = $name_cn;
-            if ($item->find('h3 small', 0) != null)
-                $name = $item->find('h3 small', 0)->text();
-
-            $res = array(
-                'name_cn' => $name_cn,
-                'name' => $name,
-                'url' => $bgmBase . $item->find('h3 a', 0)->href,
-                'img' => str_replace('cover/s/', 'cover/l/', $item->find('img.cover', 0)->src),
-                'id' => str_replace('item_', '', $item->id)
-            );
-
-            if (empty($res['img']))
-                $res['img'] = str_replace('cover/s/', 'cover/l/',
-                    $item->find('img.cover', 0)->getAttribute('data-cfsrc'));
-
-            $result[] = $res;
-        }
-        return $result;
-    }
-
-    /**
-     * 通过网页解析在看列表
-     *
-     * @access public
-     * @param string $ID Bangumi ID
-     * @param string $Type 获取类型：anime, real
-     * @return array
-     * @throws Exception
-     */
-    public static function __getWatchedCollectionRawDataByWebHelper($ID, $Type): array
-    {
-        // 初始 URL
-        $bgmBase = 'https://bgm.tv';
-        $url = "https://bgm.tv/{$Type}/list/{$ID}/collect";
-        $html = self::curlFileGetContents($url);
-        if ($html == 'null') {
-            return array(); // 没有标记数据
-        }
-
-        $doc = str_get_html($html);
-
-        // 解析页面链接
-        $urls = array();
-        $pagerEls = $doc->find('#multipage a.p');
-        foreach ($pagerEls as $pagerEl) {
-            $urls[] = $bgmBase . $pagerEl->href;
-        }
-        $urls = array_unique($urls);
-
-        $result = array();
-        $Limit = Helper::options()->plugin('PandaBangumi')->Limit;
-
-        // 保存第一页
-        $result = array_merge($result, self::__parseFromDoc($doc));
-
-        // 若不够
-        while (count($result) < $Limit && count($urls)) {
-            $url = array_shift($urls);
-            $html = self::curlFileGetContents($url);
-            if ($html == 'null') break;
-            $doc = str_get_html($html);
-
-            $result = array_merge($result, self::__parseFromDoc($doc));
-        }
-
-        return $result;
-    }
 
     /**
      * 读取与更新本地已看缓存，格式化返回已看数据
      *
      * @access public
-     * @param $ID
-     * @param $PageSize
-     * @param $From
-     * @param $ValidTimeSpan
+     * @param string $ID
+     * @param int $PageSize
+     * @param int $From
+     * @param int $ValidTimeSpan
      * @return string
      * @throws Exception
      */
-    public static function updateWatchedCacheAndReturn($ID, $PageSize, $From, $ValidTimeSpan): string
+    public static function updateWatchedCacheAndReturn(string $ID, int $PageSize, int $From, int $ValidTimeSpan): string
     {
         $cache = self::__isCacheExpired(__DIR__ . '/json/watched.json', $ValidTimeSpan);
 
         // 缓存过期或缓存无效
         if ($cache == -1 || $cache == 1) {
             // 缓存无效，重新请求，数据写入
-
-            $appId = 'bgm25a91b0a9bfd7a';
-
-            $method = Helper::options()->plugin('PandaBangumi')->ParseMethod;
-
-            $watchedAnime = array();
-            $watchedReal = array();
-            if ($method == 'webpage') {
-                $watchedAnime = self::__getWatchedCollectionRawDataByWebHelper($ID, 'anime');
-                $watchedReal = self::__getWatchedCollectionRawDataByWebHelper($ID, 'real');
-            } else {
-                $watchedAnime = self::__getWatchedCollectionRawDataHelper(
-                    'https://api.bgm.tv/user/' . $ID . '/collections/anime?app_id=' . $appId . '&max_results=25'
-                );
-                $watchedReal = self::__getWatchedCollectionRawDataHelper(
-                    'https://api.bgm.tv/user/' . $ID . '/collections/real?app_id=' . $appId . '&max_results=25'
-                );
-            }
+            $watchedAnime = self::__getCollectionRawData($ID, 0, 2);
+            $watchedReal = self::__getCollectionRawData($ID, 0, 2, 6);
 
             $cache = array('time' => time(), 'data' => array(
                 'anime' => $watchedAnime,
@@ -254,7 +147,7 @@ class BangumiAPI
         $data = $cache['data'][$cate];
         $total = count($data);
 
-        if ($From < 0 || $From > $total - 1) {
+        if ($From < 0 || $From > $total) {
             echo json_encode(array());
         } else {
             $end = min($From + $PageSize, $total);
@@ -272,13 +165,14 @@ class BangumiAPI
      * 读取与更新本地缓存，格式化返回数据
      *
      * @access public
-     * @param $ID
-     * @param $PageSize
-     * @param $From
-     * @param $ValidTimeSpan
+     * @param string $ID
+     * @param int $PageSize
+     * @param int $From
+     * @param int $ValidTimeSpan
      * @return string
+     * @throws Exception
      */
-    public static function updateCacheAndReturn($ID, $PageSize, $From, $ValidTimeSpan): string
+    public static function updateCacheAndReturn(string $ID, int $PageSize, int $From, int $ValidTimeSpan): string
     {
         $cache = self::__isCacheExpired(__DIR__ . '/json/watching.json', $ValidTimeSpan);
 
@@ -304,7 +198,7 @@ class BangumiAPI
             return json_encode(array());
         }
 
-        if ($From < 0 || $From > $total - 1) {
+        if ($From < 0 || $From > $total) {
             echo json_encode(array());
         } else {
             $end = min($From + $PageSize, $total);
