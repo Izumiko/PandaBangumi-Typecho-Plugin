@@ -65,7 +65,7 @@ class BangumiAPI
                 'status' => $item['ep_status'],
                 'count' => $item['subject']['eps'],
                 'air_date' => $item['subject']['date'],
-                'img' => $item['subject']['images']['large'],
+                'img' => $item['subject']['images']['small'],
                 'id' => $item['subject']['id'],
             );
             $collections[] = $collect;
