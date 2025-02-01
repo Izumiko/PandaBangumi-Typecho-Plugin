@@ -74,11 +74,15 @@ class Plugin implements PluginInterface
     {
         echo '作者：<a href="https://www.imalan.cn">熊猫小A</a>，插件介绍页：<a href="https://blog.imalan.cn/archives/128/">熊猫追番 (PandaBangumi) for Typecho</a><br>';
         echo '<br><strong>使用方法，在文章要插入的地方写：</strong><br>';
-        echo htmlspecialchars('所有在看：<div data-type="watching" class="bgm-collection"></div>');
+        echo htmlspecialchars('在看动画：<div data-type="watching" data-cate="anime" class="bgm-collection"></div>');
+        echo '<br>';
+        echo htmlspecialchars('在看三次元：<div data-type="watching" data-cate="real" class="bgm-collection"></div>');
         echo '<br>';
         echo htmlspecialchars('已看动画：<div data-type="watched" data-cate="anime" class="bgm-collection"></div>');
         echo '<br>';
         echo htmlspecialchars('已看三次元：<div data-type="watched" data-cate="real" class="bgm-collection"></div>');
+        echo '<br>';
+        echo htmlspecialchars('番剧日历：<div data-filter="watching" class="bgm-calendar"></div>');
         echo '<br>';
 
         $ID = new Text('ID', NULL, '', _t('用户 ID'), _t('填写你的 Bangumi 主页链接 user 后面那一串数字'));

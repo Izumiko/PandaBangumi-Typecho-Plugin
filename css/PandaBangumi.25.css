@@ -94,6 +94,46 @@
     z-index: -1;
 }
 
+.bgm-calendar-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.bgm-calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.bgm-calendar-table th,
+.bgm-calendar-table td {
+    width: 14.2857142857%; /* 100% / 7 for 7 days */
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.bgm-calendar-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2; /* 限制显示两行 */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 0;
+}
+
+.bgm-calendar-today {
+    background-color: lightpink;
+}
+
+.bgm-calendar-thumb {
+    width: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
 .loader{
     text-align: center;
     padding: 0.3em;
