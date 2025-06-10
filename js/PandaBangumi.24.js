@@ -68,66 +68,66 @@ async function loadCalendar() {
 
     const url = bgmBase + '?type=calendar&filter=' + calFilter;
 
+    const getTodayId = () => {
+        const jsDay = new Date().getDay();
+        return jsDay === 0 ? 7 : jsDay;
+    }
+
+    const createBangumiItem  = (item) => {
+        const title = item.name_cn || item.name;
+
+        const link = document.createElement('a');
+        link.href = item.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.title = title;
+        link.className = 'cal-bangumi-item';
+        link.style.backgroundImage = `url('${item.img}')`;
+        link.setAttribute('onerror', "this.style.backgroundImage='url(https://placehold.co/400x600/cccccc/ffffff?text=加载失败)'");
+
+        const titleOverlay = document.createElement('span');
+        titleOverlay.className = 'cal-bangumi-title-overlay';
+        titleOverlay.textContent = title;
+
+        link.appendChild(titleOverlay);
+        return link;
+    }
+
+
     await fetch(url)
         .then(response => response.json())
         .then(data => {
-            const header = document.createElement('div');
-            header.classList.add('bgm-calendar-header');
-            header.innerText = '番剧日历';
-            calEl.appendChild(header);
+            const todayId = getTodayId();
+            calEl.innerHTML = '';
 
-            // 创建表格元素
-            const table = document.createElement('table');
-            table.classList.add('bgm-calendar-table');
-
-            // 创建表头
-            const today = new Date();
-            const thead = document.createElement('thead');
-            const headerRow = document.createElement('tr');
             data.forEach(day => {
-                const headerCell = document.createElement('th');
-                headerCell.innerText = day.date_cn;
-                if (day.id % 7 === today.getDay()) {
-                    headerCell.classList.add('bgm-calendar-today');
+                const dayRow = document.createElement('div');
+                dayRow.className = 'cal-day-row';
+                if (day.id === todayId) {
+                    dayRow.classList.add('cal-today-highlight');
                 }
-                headerRow.appendChild(headerCell);
-            });
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
 
-            // 创建表格主体
-            const tbody = document.createElement('tbody');
-            const maxItems = Math.max(...data.map(day => Object.keys(day.items).length));
-            for (let i = 0; i < maxItems; i++) {
-                const row = document.createElement('tr');
-                data.forEach(day => {
-                    const itemsCell = document.createElement('td');
-                    itemsCell.classList.add('bgm-calendar-items');
-                    const items = day.items;
-                    if (Object.keys(items).length > i) {
-                        const item = items[Object.keys(items)[i]];
-                        const itemLink = document.createElement('a');
-                        itemLink.href = item.url;
-                        itemLink.target = '_blank';
-                        const itemThumbImg = document.createElement('img');
-                        itemThumbImg.src = item.img;
-                        itemThumbImg.classList.add('bgm-calendar-thumb');
-                        const itemTitle = document.createElement('span');
-                        itemTitle.classList.add('bgm-calendar-title');
-                        itemTitle.innerText = item.name_cn || item.name;
-                        itemLink.appendChild(itemThumbImg);
-                        itemLink.appendChild(itemTitle);
-                        // itemsCell.appendChild(itemThumb);
-                        itemsCell.appendChild(itemLink);
-                    } else {
-                        itemsCell.innerText = '';
-                    }
-                    row.appendChild(itemsCell);
-                });
-                tbody.appendChild(row);
-            }
-            table.appendChild(tbody);
-            calEl.appendChild(table);
+                const header = document.createElement('div');
+                header.className = 'cal-day-row-header';
+                header.innerHTML = `<h3>${day.date_cn}</h3>`;
+
+                const itemsWrapper = document.createElement('div');
+                itemsWrapper.className = 'cal-items-container';
+
+                const itemsArray = day.items ? Object.values(day.items) : [];
+
+                if (itemsArray.length > 0) {
+                    itemsArray.forEach(item => {
+                        itemsWrapper.appendChild(createBangumiItem(item));
+                    });
+                } else {
+                    itemsWrapper.innerHTML = `<p style="color:#a0aec0; font-size: 0.875rem;">今日无更新</p>`;
+                }
+
+                dayRow.appendChild(header);
+                dayRow.appendChild(itemsWrapper);
+                calEl.appendChild(dayRow);
+            });
         })
 }
 

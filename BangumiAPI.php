@@ -106,7 +106,7 @@ class BangumiAPI
                     'name' => $item['name'],
                     'name_cn' => $item['name_cn'],
                     'url' => $item['url'],
-                    'img' => $item['images']['grid']
+                    'img' => $item['images']['small']
                 ];
             }, $day['items']);
             $calendar[] = array(
