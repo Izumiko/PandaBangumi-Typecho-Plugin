@@ -36,14 +36,16 @@ class Action extends Contents implements ActionInterface
         $ID = $options->plugin('PandaBangumi')->ID;
         $PageSize = $options->plugin('PandaBangumi')->PageSize;
         $ValidTimeSpan = $options->plugin('PandaBangumi')->ValidTimeSpan;
-        $From = $_GET['from'];
+        $From = array_key_exists('from', $_GET) ? $_GET['from'] : 0;
         if ($PageSize == -1) {
             $PageSize = 1000000;
         }
 
         if (strtolower($_GET['type']) == 'watching')
-            echo BangumiAPI::updateCacheAndReturn($ID, $PageSize, $From, $ValidTimeSpan);
+            echo BangumiAPI::updateWatchingCacheAndReturn($ID, $PageSize, $From, $ValidTimeSpan);
         elseif (strtolower($_GET['type']) == 'watched')
             echo BangumiAPI::updateWatchedCacheAndReturn($ID, $PageSize, $From, $ValidTimeSpan);
+        elseif (strtolower($_GET['type']) == 'calendar')
+            echo BangumiAPI::updateCalendarCacheAndReturn($ID, $ValidTimeSpan);
     }
 }

@@ -32,6 +32,11 @@
 <div data-type="watched" data-cate="real" class="bgm-collection"></div>
 ```
 
+追番日历（去掉`data-filter="watching"`则显示所有番剧）
+```html
+<div data-filter="watching" class="bgm-calendar"></div>
+```
+
 保存发布，这个位置就会展开成追番展示面板。加载和分页都使用 AJAX 请求～
 
 插件带了缓存功能，可以极大地提升速度，**但是记得要保证 `插件目录/json/` 这个目录可写**。

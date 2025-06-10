@@ -35,7 +35,7 @@ class BangumiAPI
      *
      * @param string $ID
      * @param int $Offset
-     * @param int $status 1:想看2:看过 3:在看 4:搁置 5:抛弃
+     * @param int $status 1:想看 2:看过 3:在看 4:搁置 5:抛弃
      * @param int $subject_type 1:book 2:anime 3:music 4:game 6:real
      * @return array
      * @throws Exception
@@ -78,6 +78,46 @@ class BangumiAPI
         }
 
         return $collections;
+    }
+
+    /**
+     * 获取日历数据并格式化返回
+     *
+     * @return array
+     * @throws Exception
+     */
+    private static function __getCalendarRawData(): array
+    {
+        $apiUrl = 'https://api.bgm.tv/calendar';
+        $json = self::curlFileGetContents($apiUrl);
+
+        if ($json == 'null') {
+            return array();
+        }
+
+        $data = json_decode($json, true);
+
+        $calendar = array();
+
+        foreach ($data as $day) {
+            $items = array_map(function ($item) {
+                return [
+                    'id' => $item['id'],
+                    'name' => $item['name'],
+                    'name_cn' => $item['name_cn'],
+                    'url' => $item['url'],
+                    'img' => $item['images']['small']
+                ];
+            }, $day['items']);
+            $calendar[] = array(
+                'id' => $day['weekday']['id'],
+                'date_en' => $day['weekday']['en'],
+                'date_cn' => $day['weekday']['cn'],
+                'items' => $items
+            );
+        }
+
+        return $calendar;
     }
 
     /**
@@ -141,6 +181,7 @@ class BangumiAPI
         }
 
         $cate = array_key_exists('cate', $_GET) ? $_GET['cate'] : 'anime';
+        $cate = $cate == 'null' ? 'anime' : $cate;
         if (!array_key_exists($cate, $cache['data']))
             return json_encode(array());
 
@@ -172,31 +213,33 @@ class BangumiAPI
      * @return string
      * @throws Exception
      */
-    public static function updateCacheAndReturn(string $ID, int $PageSize, int $From, int $ValidTimeSpan): string
+    public static function updateWatchingCacheAndReturn(string $ID, int $PageSize, int $From, int $ValidTimeSpan): string
     {
         $cache = self::__isCacheExpired(__DIR__ . '/json/watching.json', $ValidTimeSpan);
 
         if ($cache == -1 || $cache == 1) {
             // 缓存无效，重新请求，数据写入
-            $raw = self::__getCollectionRawData($ID);
-            if ($raw == -1 || count($raw) == 0) {
+            $watchingAnime = self::__getCollectionRawData($ID);
+            $watchingReal = self::__getCollectionRawData($ID, 0, 3, 6);
+            if (!count($watchingAnime) && !count($watchingReal)) {
                 // 请求数据为空
                 $cache = array('time' => 1, 'data' => array());
             } else {
-                $cache = array('time' => time(), 'data' => $raw);
+                $cache = array('time' => time(), 'data' => array(
+                    'anime' => $watchingAnime,
+                    'real' => $watchingReal
+                ));
             }
             file_put_contents(__DIR__ . '/json/watching.json', json_encode($cache));
         }
 
-        $data = $cache['data'];
-        $total = count($data);
-
-        if ($total == 0) {
-            // 当前没有数据，把缓存时间重置为 1，下次请求自动刷新
-            $cache['time'] = 1;
-            file_put_contents(__DIR__ . '/json/watching.json', json_encode($cache));
+        $cate = array_key_exists('cate', $_GET) ? $_GET['cate'] : 'anime';
+        $cate = $cate == 'null' ? 'anime' : $cate;
+        if (!array_key_exists($cate, $cache['data']))
             return json_encode(array());
-        }
+
+        $data = $cache['data'][$cate];
+        $total = count($data);
 
         if ($From < 0 || $From > $total) {
             echo json_encode(array());
@@ -210,5 +253,53 @@ class BangumiAPI
         }
 
         return json_encode(array());
+    }
+
+    /**
+     * 读取与更新本地日历缓存，格式化返回日历数据
+     *
+     * @access public
+     * @param string $ID
+     * @param int $ValidTimeSpan
+     * @return string
+     * @throws Exception
+     */
+    public static function updateCalendarCacheAndReturn(string $ID, int $ValidTimeSpan): string
+    {
+        $cache = self::__isCacheExpired(__DIR__ . '/json/calendar.json', $ValidTimeSpan);
+
+        if ($cache == -1 || $cache == 1) {
+            // 缓存无效，重新请求，数据写入
+            $raw = self::__getCalendarRawData();
+            if ($raw == -1 || count($raw) == 0) {
+                // 请求数据为空
+                $cache = array('time' => 1, 'data' => array());
+            } else {
+                $cache = array('time' => time(), 'data' => $raw);
+            }
+            file_put_contents(__DIR__ . '/json/calendar.json', json_encode($cache));
+        }
+
+        $filter = array_key_exists('filter', $_GET) ? $_GET['filter'] : 'watching';
+        if ($filter != 'watching') {
+            return json_encode($cache['data']);
+        }
+
+        $watchingAnimes = json_decode(self::updateWatchingCacheAndReturn($ID, 1000, 0, $ValidTimeSpan), true);
+        $watchingAnimeIds = array_column($watchingAnimes, 'id');
+
+        $cal = array();
+        foreach ($cache['data'] as $day) {
+            $items = array_filter($day['items'], function ($item) use ($watchingAnimeIds) {
+                return in_array($item['id'], $watchingAnimeIds);
+            });
+            $cal[] = array(
+                'id' => $day['id'],
+                'date_en' => $day['date_en'],
+                'date_cn' => $day['date_cn'],
+                'items' => $items
+            );
+        }
+        return json_encode($cal);
     }
 }

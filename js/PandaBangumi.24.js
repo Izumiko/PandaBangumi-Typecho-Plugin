@@ -1,4 +1,4 @@
-function loadMoreBgm(loader) {
+async function loadMoreBgm(loader) {
     if (loader === 'all') {
         // 加载页面上的全部面板
         Array.from(document.querySelectorAll('.loader')).forEach(item => {
@@ -17,7 +17,7 @@ function loadMoreBgm(loader) {
     const cate = listEl.getAttribute('data-cate');
 
     const url = bgmBase + '?from=' + String(bgmCur) + '&type=' + type + '&cate=' + cate;
-    fetch(url)
+    await fetch(url)
         .then(response => response.json())
         .then(data => {
             loader.innerHTML = '加载更多';
@@ -62,7 +62,76 @@ function loadMoreBgm(loader) {
         })
 }
 
-function initCollection() {
+async function loadCalendar() {
+    const calEl = document.querySelector('.bgm-calendar');
+    const calFilter = calEl.getAttribute('data-filter');
+
+    const url = bgmBase + '?type=calendar&filter=' + calFilter;
+
+    const getTodayId = () => {
+        const jsDay = new Date().getDay();
+        return jsDay === 0 ? 7 : jsDay;
+    }
+
+    const createBangumiItem  = (item) => {
+        const title = item.name_cn || item.name;
+
+        const link = document.createElement('a');
+        link.href = item.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.title = title;
+        link.className = 'cal-bangumi-item';
+        link.style.backgroundImage = `url('${item.img}')`;
+        link.setAttribute('onerror', "this.style.backgroundImage='url(https://placehold.co/400x600/cccccc/ffffff?text=加载失败)'");
+
+        const titleOverlay = document.createElement('span');
+        titleOverlay.className = 'cal-bangumi-title-overlay';
+        titleOverlay.textContent = title;
+
+        link.appendChild(titleOverlay);
+        return link;
+    }
+
+
+    await fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            const todayId = getTodayId();
+            calEl.innerHTML = '';
+
+            data.forEach(day => {
+                const dayRow = document.createElement('div');
+                dayRow.className = 'cal-day-row';
+                if (day.id === todayId) {
+                    dayRow.classList.add('cal-today-highlight');
+                }
+
+                const header = document.createElement('div');
+                header.className = 'cal-day-row-header';
+                header.innerHTML = `<h3>${day.date_cn}</h3>`;
+
+                const itemsWrapper = document.createElement('div');
+                itemsWrapper.className = 'cal-items-container';
+
+                const itemsArray = day.items ? Object.values(day.items) : [];
+
+                if (itemsArray.length > 0) {
+                    itemsArray.forEach(item => {
+                        itemsWrapper.appendChild(createBangumiItem(item));
+                    });
+                } else {
+                    itemsWrapper.innerHTML = `<p style="color:#a0aec0; font-size: 0.875rem;">今日无更新</p>`;
+                }
+
+                dayRow.appendChild(header);
+                dayRow.appendChild(itemsWrapper);
+                calEl.appendChild(dayRow);
+            });
+        })
+}
+
+async function initCollection() {
     let bgmIndex = 0;
     Array.from(document.querySelectorAll('.bgm-collection')).forEach(item => {
         bgmIndex++;
@@ -70,13 +139,11 @@ function initCollection() {
         item.insertAdjacentHTML('afterend', '<div class="loader" data-ref="' + '#bgm-collection-' + String(bgmIndex) + '" onclick="loadMoreBgm(this);"></div>');
     });
 
-    loadMoreBgm('all');
+    await loadMoreBgm('all');
+
+    await loadCalendar();
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    initCollection();
-})
+document.addEventListener('DOMContentLoaded', async () => initCollection())
 
-document.addEventListener('pjax:complete', function () {
-    initCollection();
-})
+document.addEventListener('pjax:complete', async () => initCollection())
