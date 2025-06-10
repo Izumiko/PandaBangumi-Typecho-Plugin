@@ -21,11 +21,11 @@ if (!defined('__TYPECHO_ROOT_DIR__')) {
  *
  * @package PandaBangumi
  * @author 熊猫小A
- * @version 2.4
+ * @version 2.5
  * @link https://www.imalan.cn
  */
 
-define('PandaBangumi_Plugin_VERSION', '2.3');
+define('PandaBangumi_Plugin_VERSION', '2.5');
 
 class Plugin implements PluginInterface
 {
@@ -140,7 +140,7 @@ class Plugin implements PluginInterface
     public static function footer(): void
     {
         echo '<script type="text/javascript" src="';
-        Options::alloc()->pluginUrl('/PandaBangumi/js/PandaBangumi.24.js');
+        Options::alloc()->pluginUrl('/PandaBangumi/js/PandaBangumi.25.js');
         echo '?v=' . PandaBangumi_Plugin_VERSION . '"></script>';
     }
 }
