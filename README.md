@@ -14,6 +14,9 @@
 
 在任何页面，不论是独立页还是一般的文章页面，在文章里插入代码：
 
+### 追番列表
+![](./screenshots/watching.webp)
+
 在看
 
 ```html
@@ -32,10 +35,16 @@
 <div data-type="watched" data-cate="real" class="bgm-collection"></div>
 ```
 
+### 追番日历
+![](./screenshots/calendar.webp)
+
 追番日历（去掉`data-filter="watching"`则显示所有番剧）
 ```html
 <div data-filter="watching" class="bgm-calendar"></div>
 ```
+
+### 番剧卡片
+![](./screenshots/bangumiCard.webp)
 
 番剧卡片
 ```html
