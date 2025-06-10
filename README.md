@@ -37,6 +37,11 @@
 <div data-filter="watching" class="bgm-calendar"></div>
 ```
 
+番剧卡片
+```html
+<div class="bgm-card" data-id="番剧id"></div>
+```
+
 保存发布，这个位置就会展开成追番展示面板。加载和分页都使用 AJAX 请求～
 
 插件带了缓存功能，可以极大地提升速度，**但是记得要保证 `插件目录/json/` 这个目录可写**。
