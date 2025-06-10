@@ -1,56 +1,60 @@
 /* 追番列表 */
-.bgm-collection{
+.bgm-collection {
     display: flex;
     flex-flow: row wrap;
     margin: 0 auto 0 -15px;
     width: calc(100% + 15px);
 }
 
-.bgm-item{
+.bgm-item {
     display: block;
     margin-left: 15px;
     margin-bottom: 15px;
     position: relative;
-    box-shadow: 0 0 6px rgba(0,0,0,0.2);
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
     transition: 0.3s ease box-shadow;
-    border: none!important;
-    text-decoration: none!important;
+    border: none !important;
+    text-decoration: none !important;
     background: #fff;
 }
-.bgm-item:hover{
-    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-    border: none!important;
-    text-decoration: none!important;
+
+.bgm-item:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    border: none !important;
+    text-decoration: none !important;
 }
 
-@media screen and (max-width:768px){
-    .bgm-item{
+@media screen and (max-width: 768px) {
+    .bgm-item {
         width: calc(33.33333333333% - 15px)
     }
 }
 
-@media screen and (max-width:450px){
-    .bgm-item{
+@media screen and (max-width: 450px) {
+    .bgm-item {
         width: calc(50% - 15px)
     }
 }
 
-@media screen and (min-width:768px){
-    .bgm-item{
+@media screen and (min-width: 768px) {
+    .bgm-item {
         width: calc(25% - 15px)
     }
 
     .bgm-calendar {
         gap: 0.5rem;
     }
+
     .cal-day-row {
         flex-direction: row;
     }
+
     .cal-day-row-header {
         width: 3.5rem;
         border-bottom: none;
         border-right: 1px solid #edf2f7;
     }
+
     .cal-day-row-header h3 {
         writing-mode: vertical-rl;
         text-orientation: mixed;
@@ -59,7 +63,7 @@
     }
 }
 
-.bgm-item-thumb{
+.bgm-item-thumb {
     width: 100%;
     padding-top: 120%;
     background-position: center;
@@ -67,7 +71,7 @@
     background-size: cover;
 }
 
-.bgm-item-info{
+.bgm-item-info {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -75,36 +79,41 @@
     padding: 0.5rem;
     overflow: hidden;
 }
-.bgm-item-info >*{
+
+.bgm-item-info > * {
     display: block;
     text-align: center;
     margin: 0 auto;
     max-width: 100%;
 }
 
-.bgm-item-title{
+.bgm-item-title {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 0.9rem;
     color: #333
 }
-.bgm-item-title:not(.main){
+
+.bgm-item-title:not(.main) {
     color: #5e5b5c;
 }
-.bgm-item-title.main{
+
+.bgm-item-title.main {
     font-size: 1.2rem;
 }
-.bgm-item-statusBar-container{
+
+.bgm-item-statusBar-container {
     margin: 0.2rem auto;
     padding: 0.2em;
-    background: rgba(0,0,0,0.1);
+    background: rgba(0, 0, 0, 0.1);
     width: 100%;
     position: relative;
     z-index: 0;
     color: #333;
 }
-.bgm-item-statusBar{
+
+.bgm-item-statusBar {
     position: absolute;
     height: 100%;
     background: lightpink;
@@ -178,6 +187,7 @@
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 .cal-bangumi-item:hover {
     transform: translateY(-4px);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -194,7 +204,7 @@
     font-size: 11px;
     padding: 6px;
     text-align: center;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -301,18 +311,22 @@
     -webkit-mask-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/></svg>');
     mask-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/></svg>');
 }
+
 .icon-trophy {
     -webkit-mask-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.2,2H19.5H4.5H3.8H2V11C2,12 3,13 4,13H7.2C7.6,14.9 8.6,16.6 11,16.9V19C8,19.2 8,20.3 8,21H16C16,20.3 16,19.2 13,19V16.9C15.4,16.6 16.4,14.9 16.8,13H20C21,13 22,12 22,11V2H20.2M4,11V4H7V11H4M17,11V4H20V11H17Z"/></svg>');
     mask-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.2,2H19.5H4.5H3.8H2V11C2,12 3,13 4,13H7.2C7.6,14.9 8.6,16.6 11,16.9V19C8,19.2 8,20.3 8,21H16C16,20.3 16,19.2 13,19V16.9C15.4,16.6 16.4,14.9 16.8,13H20C21,13 22,12 22,11V2H20.2M4,11V4H7V11H4M17,11V4H20V11H17Z"/></svg>');
 }
+
 .icon-calendar {
     -webkit-mask-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19,19H5V8H19M19,3H18V1H16V3H8V1H6V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M16.53,11.06L15.47,10L10.59,14.88L8.47,12.76L7.41,13.82L10.59,17L16.53,11.06Z"/></svg>');
     mask-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19,19H5V8H19M19,3H18V1H16V3H8V1H6V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M16.53,11.06L15.47,10L10.59,14.88L8.47,12.76L7.41,13.82L10.59,17L16.53,11.06Z"/></svg>');
 }
+
 .icon-tv {
     -webkit-mask-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21,3H3C1.89,3 1,3.89 1,5V17A2,2 0 0,0 3,19H8V21H16V19H21A2,2 0 0,0 23,17V5C23,3.89 22.1,3 21,3M21,17H3V5H21V17Z"/></svg>');
     mask-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21,3H3C1.89,3 1,3.89 1,5V17A2,2 0 0,0 3,19H8V21H16V19H21A2,2 0 0,0 23,17V5C23,3.89 22.1,3 21,3M21,17H3V5H21V17Z"/></svg>');
 }
+
 .icon-list {
     -webkit-mask-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9,5V9H21V5M9,19H21V15H9M9,14H21V10H9M4,9H8V5H4M4,19H8V15H4M4,14H8V10H4V14Z"/></svg>');
     mask-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9,5V9H21V5M9,19H21V15H9M9,14H21V10H9M4,9H8V5H4M4,19H8V15H4M4,14H8V10H4V14Z"/></svg>');
@@ -353,75 +367,83 @@
     color: #e53935;
 }
 
-.loader{
+.loader {
     text-align: center;
     padding: 0.3em;
     width: 6.5em;
     margin: 1.2rem auto;
-    border: 3px solid rgba(0,0,0,0.2);
+    border: 3px solid rgba(0, 0, 0, 0.2);
     color: #333;
     transition: 0.3s ease all;
     cursor: pointer;
     white-space: nowrap;
 }
+
 body.theme-dark .loader {
-    border: 3px solid rgba(255, 255, 255,0.2);
+    border: 3px solid rgba(255, 255, 255, 0.2);
     color: #b0b0b0
 }
+
 .loader:hover,
 body.theme-dark .loader:hover {
     border: 3px solid lightpink;
     color: lightpink;
 }
+
 .dot {
-	width:8px;
-	height:8px;
-	background:lightpink;
-	border-radius:100%;
-	display:inline-block;
-	-webkit-animation:slide 1s infinite;
-	animation:slide 1s infinite;
-	margin:0 10px
+    width: 8px;
+    height: 8px;
+    background: lightpink;
+    border-radius: 100%;
+    display: inline-block;
+    -webkit-animation: slide 1s infinite;
+    animation: slide 1s infinite;
+    margin: 0 10px
 }
+
 .dot:nth-child(1) {
-	-webkit-animation-delay:.1s;
-	animation-delay:.1s;
+    -webkit-animation-delay: .1s;
+    animation-delay: .1s;
 }
+
 .dot:nth-child(2) {
-	-webkit-animation-delay:.2s;
-	animation-delay:.2s;
+    -webkit-animation-delay: .2s;
+    animation-delay: .2s;
 }
+
 .dot:nth-child(3) {
-	-webkit-animation-delay:.3s;
-	animation-delay:.3s;
+    -webkit-animation-delay: .3s;
+    animation-delay: .3s;
 }
 
 @-webkit-keyframes slide {
-	0% {
-	-webkit-transform:scale(1);
-	transform:scale(1)
+    0% {
+        -webkit-transform: scale(1);
+        transform: scale(1)
+    }
+    50% {
+        opacity: .3;
+        -webkit-transform: scale(2);
+        transform: scale(2)
+    }
+    100% {
+        -webkit-transform: scale(1);
+        transform: scale(1)
+    }
 }
-50% {
-	opacity:.3;
-	-webkit-transform:scale(2);
-	transform:scale(2)
-}
-100% {
-	-webkit-transform:scale(1);
-	transform:scale(1)
-}
-}@keyframes slide {
-	0% {
-	-webkit-transform:scale(1);
-	transform:scale(1)
-}
-50% {
-	opacity:.3;
-	-webkit-transform:scale(2);
-	transform:scale(2)
-}
-100% {
-	-webkit-transform:scale(1);
-	transform:scale(1)
-}
+
+@keyframes slide {
+    0% {
+        -webkit-transform: scale(1);
+        transform: scale(1)
+    }
+    50% {
+        opacity: .3;
+        -webkit-transform: scale(2);
+        transform: scale(2)
+    }
+    100% {
+        -webkit-transform: scale(1);
+        transform: scale(1)
+    }
 }

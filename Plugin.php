@@ -84,6 +84,8 @@ class Plugin implements PluginInterface
         echo '<br>';
         echo htmlspecialchars('追番日历：<div data-filter="watching" class="bgm-calendar"></div>');
         echo '<br>';
+        echo htmlspecialchars('番剧卡片：<div class="bgm-card" data-id="番剧id"></div>');
+        echo '<br>';
 
         $ID = new Text('ID', NULL, '', _t('用户 ID'), _t('填写你的 Bangumi 主页链接 user 后面那一串数字'));
         $form->addInput($ID);
